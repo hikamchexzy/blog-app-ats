@@ -4,11 +4,13 @@ import '../models/post.dart';
 class PostCard extends StatelessWidget {
   final Post post;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   const PostCard({
     super.key,
     required this.post,
     required this.onTap,
+    this.onLongPress,
   });
 
   @override
@@ -18,6 +20,7 @@ class PostCard extends StatelessWidget {
       elevation: 2,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.all(14.0),

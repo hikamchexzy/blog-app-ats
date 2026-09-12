@@ -4,6 +4,7 @@ import '../services/api_service.dart';
 import '../widgets/post_card.dart';
 import 'post_detail_screen.dart';
 import 'post_form_screen.dart';
+import '../models/category.dart';
 
 class PostListScreen extends StatefulWidget {
   const PostListScreen({super.key});
@@ -22,6 +23,7 @@ class _PostListScreenState extends State<PostListScreen> {
   void initState() {
     super.initState();
     _loadPosts();
+    _loadCategories();
   }
 
   Future<void> _loadPosts() async {
@@ -31,7 +33,14 @@ class _PostListScreenState extends State<PostListScreen> {
     });
 
     try {
-      final posts = await ApiService.getPosts(status: _filterStatus);
+      // Ambil dari API
+      List<Post> posts = await ApiService.getPosts(status: _filterStatus);
+
+      // Filter lokal berdasarkan kategori (opsional)
+      if (_filterCategoryId != null) {
+        posts = posts.where((p) => p.categoryId == _filterCategoryId).toList();
+      }
+
       setState(() {
         _posts = posts;
         _loading = false;
@@ -65,6 +74,96 @@ class _PostListScreenState extends State<PostListScreen> {
     if (created == true) _loadPosts();
   }
 
+  Future<void> _showOptions(Post post) async {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.open_in_new),
+              title: const Text('Buka Detail'),
+              onTap: () {
+                Navigator.pop(context);
+                _openDetail(post);
+              },
+            ),
+            if (!post.isDeleted)
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Hapus Artikel (Soft Delete)'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text('Konfirmasi Hapus'),
+                      content: Text(
+                        'Yakin mau menghapus "${post.title}"?\n\nBisa di-restore nanti.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Batal'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                          ),
+                          child: const Text('Hapus'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true) {
+                    try {
+                      await ApiService.deletePost(post.id);
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Artikel berhasil dihapus'),
+                        ),
+                      );
+                      _loadPosts();
+                    } catch (e) {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('Gagal: $e')));
+                    }
+                  }
+                },
+              ),
+            if (post.isDeleted)
+              ListTile(
+                leading: const Icon(Icons.restore, color: Colors.green),
+                title: const Text('Restore Artikel'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  try {
+                    await ApiService.restorePost(post.id);
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Artikel berhasil di-restore'),
+                      ),
+                    );
+                    _loadPosts();
+                  } catch (e) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Gagal: $e')));
+                  }
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,16 +172,52 @@ class _PostListScreenState extends State<PostListScreen> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50),
+          preferredSize: const Size.fromHeight(100),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Row(
+            child: Column(
               children: [
-                _filterChip('Semua', null),
-                const SizedBox(width: 8),
-                _filterChip('Aktif', 'active'),
-                const SizedBox(width: 8),
-                _filterChip('Terhapus', 'delete'),
+                // Baris 1: Filter status
+                Row(
+                  children: [
+                    _filterChip('Semua', null),
+                    const SizedBox(width: 8),
+                    _filterChip('Aktif', 'active'),
+                    const SizedBox(width: 8),
+                    _filterChip('Terhapus', 'delete'),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                // Baris 2: Dropdown kategori
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: DropdownButton<int?>(
+                    value: _filterCategoryId,
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    hint: const Text('Semua Kategori'),
+                    items: [
+                      const DropdownMenuItem<int?>(
+                        value: null,
+                        child: Text('Semua Kategori'),
+                      ),
+                      ..._categories.map((c) {
+                        return DropdownMenuItem<int?>(
+                          value: c.id,
+                          child: Text(c.name),
+                        );
+                      }),
+                    ],
+                    onChanged: (v) {
+                      setState(() => _filterCategoryId = v);
+                      _loadPosts();
+                    },
+                  ),
+                ),
               ],
             ),
           ),
@@ -158,9 +293,20 @@ class _PostListScreenState extends State<PostListScreen> {
           return PostCard(
             post: _posts[i],
             onTap: () => _openDetail(_posts[i]),
+            onLongPress: () => _showOptions(_posts[i]),
           );
         },
       ),
     );
+  }
+
+  List<Category> _categories = [];
+  int? _filterCategoryId;
+
+  Future<void> _loadCategories() async {
+    try {
+      final cats = await ApiService.getCategories(status: 'active');
+      setState(() => _categories = cats);
+    } catch (_) {}
   }
 }

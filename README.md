@@ -1,10 +1,14 @@
 # Blog App - ATS RPL 2026/2027
 
-Aplikasi Blog dengan Backend REST API + Flutter Web.
+Aplikasi Blog dengan Backend REST API + Flutter Web, dibuat untuk **Assessment Tengah Semester** Kompetensi Keahlian Rekayasa Perangkat Lunak, **SMK Taruna Bhakti**.
 
 ## Teknologi
-- **Backend:** Node.js + Express + TypeScript + Drizzle ORM + MySQL
-- **Frontend:** Flutter Web
+
+| Layer | Teknologi |
+|-------|-----------|
+| Backend | Node.js, Express, TypeScript, Drizzle ORM |
+| Database | MySQL (`db_blog_app`) |
+| Frontend | Flutter Web (Dart) |
 
 ## Struktur
 - `backend/` - REST API server
