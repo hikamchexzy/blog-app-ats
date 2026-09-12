@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/post.dart';
 import '../services/api_service.dart';
+import 'post_form_screen.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final int postId;
@@ -112,15 +113,21 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           foregroundColor: Colors.white,
           actions: [
             if (_post != null && !_post!.isDeleted)
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Fitur edit akan dibuat di hari ke-6')),
-                  );
-                },
-              ),
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () async {
+                final updated = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PostFormScreen(post: _post),
+                  ),
+                );
+                if (updated == true) {
+                  _changed = true;
+                  _loadDetail();
+                }
+              },
+            ),
             if (_post != null && !_post!.isDeleted)
               IconButton(
                 icon: const Icon(Icons.delete),
