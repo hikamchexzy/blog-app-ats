@@ -3,7 +3,8 @@ class Post {
   final String title;
   final String content;
   final int? categoryId;
-  final String? categoryName;   // Dari hasil JOIN backend
+  final String? categoryName;
+  final String status;
   final String? createdAt;
   final String? updatedAt;
 
@@ -13,6 +14,7 @@ class Post {
     required this.content,
     this.categoryId,
     this.categoryName,
+    this.status = 'active',
     this.createdAt,
     this.updatedAt,
   });
@@ -24,6 +26,7 @@ class Post {
       content: json['content'] ?? '',
       categoryId: json['categoryId'],
       categoryName: json['categoryName'],
+      status: json['status'] ?? 'active',
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
     );
@@ -36,4 +39,6 @@ class Post {
       'categoryId': categoryId,
     };
   }
+
+  bool get isDeleted => status == 'delete';
 }

@@ -7,8 +7,12 @@ class ApiService {
   static const String baseUrl = 'http://localhost:4000/api';
 
   // ============ CATEGORIES ============
-  static Future<List<Category>> getCategories() async {
-    final response = await http.get(Uri.parse('$baseUrl/categories'));
+  static Future<List<Category>> getCategories({String? status}) async {
+    final url = status != null
+        ? '$baseUrl/categories?status=$status'
+        : '$baseUrl/categories';
+
+    final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
@@ -19,9 +23,12 @@ class ApiService {
   }
 
   // ============ POSTS ============
-  // GET semua posts
-  static Future<List<Post>> getPosts() async {
-    final response = await http.get(Uri.parse('$baseUrl/posts'));
+  static Future<List<Post>> getPosts({String? status}) async {
+    final url = status != null
+        ? '$baseUrl/posts?status=$status'
+        : '$baseUrl/posts';
+
+    final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
@@ -31,7 +38,6 @@ class ApiService {
     }
   }
 
-  // GET post by ID
   static Future<Post> getPostById(int id) async {
     final response = await http.get(Uri.parse('$baseUrl/posts/$id'));
 
@@ -44,7 +50,6 @@ class ApiService {
     }
   }
 
-  // POST buat artikel baru
   static Future<Post> createPost({
     required String title,
     required String content,
@@ -68,7 +73,6 @@ class ApiService {
     }
   }
 
-  // PUT update artikel
   static Future<Post> updatePost({
     required int id,
     required String title,
@@ -93,12 +97,19 @@ class ApiService {
     }
   }
 
-  // DELETE artikel
   static Future<void> deletePost(int id) async {
     final response = await http.delete(Uri.parse('$baseUrl/posts/$id'));
 
     if (response.statusCode != 200) {
       throw Exception('Gagal menghapus artikel');
+    }
+  }
+
+  static Future<void> restorePost(int id) async {
+    final response = await http.put(Uri.parse('$baseUrl/posts/$id/restore'));
+
+    if (response.statusCode != 200) {
+      throw Exception('Gagal restore artikel');
     }
   }
 }

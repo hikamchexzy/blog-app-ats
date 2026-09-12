@@ -1,25 +1,23 @@
 class Category {
   final int id;
   final String name;
+  final String status;
 
   Category({
     required this.id,
     required this.name,
+    this.status = 'active',
   });
 
-  // Factory untuk konversi dari JSON (response API)
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
       id: json['id'],
       name: json['name'],
+      status: json['status'] ?? 'active',
     );
   }
 
-  // Konversi ke JSON (untuk dikirim ke API)
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-    };
+    return {'name': name};
   }
 }
