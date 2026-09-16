@@ -86,12 +86,12 @@ class _PostListScreenState extends State<PostListScreen> {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Wrap(
             children: [
-              // Header kecil
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
                 child: Text(
                   post.title,
                   style: const TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
                   ),
@@ -102,7 +102,10 @@ class _PostListScreenState extends State<PostListScreen> {
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.open_in_new, color: AppColors.primary),
-                title: const Text('Buka Detail'),
+                title: const Text(
+                  'Buka Detail',
+                  style: TextStyle(fontFamily: AppTheme.fontFamily),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _openDetail(post);
@@ -110,9 +113,15 @@ class _PostListScreenState extends State<PostListScreen> {
               ),
               if (!post.isDeleted)
                 ListTile(
-                  leading: const Icon(Icons.delete_outline, color: AppColors.danger),
-                  title: const Text('Hapus Artikel',
-                      style: TextStyle(color: AppColors.danger)),
+                  leading: const Icon(Icons.delete_outline,
+                      color: AppColors.danger),
+                  title: const Text(
+                    'Hapus Artikel',
+                    style: TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      color: AppColors.danger,
+                    ),
+                  ),
                   onTap: () async {
                     Navigator.pop(context);
                     await _confirmDelete(post);
@@ -120,15 +129,22 @@ class _PostListScreenState extends State<PostListScreen> {
                 ),
               if (post.isDeleted)
                 ListTile(
-                  leading: const Icon(Icons.restore, color: AppColors.success),
-                  title: const Text('Restore Artikel',
-                      style: TextStyle(color: AppColors.success)),
+                  leading:
+                      const Icon(Icons.restore, color: AppColors.success),
+                  title: const Text(
+                    'Restore Artikel',
+                    style: TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      color: AppColors.success,
+                    ),
+                  ),
                   onTap: () async {
                     Navigator.pop(context);
                     try {
                       await ApiService.restorePost(post.id);
                       if (!mounted) return;
-                      _showSnack('Artikel berhasil di-restore', AppColors.success);
+                      _showSnack(
+                          'Artikel berhasil di-restore', AppColors.success);
                       _loadPosts();
                     } catch (e) {
                       _showSnack('Gagal: $e', AppColors.danger);
@@ -152,12 +168,19 @@ class _PostListScreenState extends State<PostListScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
+            child: const Text(
+              'Batal',
+              style: TextStyle(fontFamily: AppTheme.fontFamily),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
-            child: const Text('Hapus'),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.danger),
+            child: const Text(
+              'Hapus',
+              style: TextStyle(fontFamily: AppTheme.fontFamily),
+            ),
           ),
         ],
       ),
@@ -179,7 +202,10 @@ class _PostListScreenState extends State<PostListScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg),
+        content: Text(
+          msg,
+          style: const TextStyle(fontFamily: AppTheme.fontFamily),
+        ),
         backgroundColor: color,
       ),
     );
@@ -190,8 +216,47 @@ class _PostListScreenState extends State<PostListScreen> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
-        title: const Text('Blog App'),
-        elevation: 0,
+        titleSpacing: 16,
+        title: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/images/Logo Dlob.png',
+                width: 32,
+                height: 32,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  // Fallback kalau logo tidak ketemu
+                  return Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.public,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'NowSphere',
+              style: TextStyle(
+                fontFamily: AppTheme.fontFamily,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -214,7 +279,6 @@ class _PostListScreenState extends State<PostListScreen> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Column(
               children: [
-                // Chip filter status
                 Row(
                   children: [
                     _statusChip('Semua', null),
@@ -225,7 +289,6 @@ class _PostListScreenState extends State<PostListScreen> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                // Dropdown kategori
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   decoration: BoxDecoration(
@@ -238,17 +301,29 @@ class _PostListScreenState extends State<PostListScreen> {
                     underline: const SizedBox(),
                     icon: const Icon(Icons.keyboard_arrow_down,
                         color: AppColors.primary),
-                    hint: const Text('Semua Kategori',
-                        style: TextStyle(fontSize: 14)),
+                    hint: const Text(
+                      'Semua Kategori',
+                      style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
+                        fontSize: 14,
+                      ),
+                    ),
                     items: [
                       const DropdownMenuItem<int?>(
                         value: null,
-                        child: Text('Semua Kategori'),
+                        child: Text(
+                          'Semua Kategori',
+                          style: TextStyle(fontFamily: AppTheme.fontFamily),
+                        ),
                       ),
                       ..._categories.map((c) {
                         return DropdownMenuItem<int?>(
                           value: c.id,
-                          child: Text(c.name),
+                          child: Text(
+                            c.name,
+                            style: const TextStyle(
+                                fontFamily: AppTheme.fontFamily),
+                          ),
                         );
                       }),
                     ],
@@ -267,7 +342,13 @@ class _PostListScreenState extends State<PostListScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openCreateForm,
         icon: const Icon(Icons.add),
-        label: const Text('Tulis'),
+        label: const Text(
+          'Tulis',
+          style: TextStyle(
+            fontFamily: AppTheme.fontFamily,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         backgroundColor: AppColors.primary,
       ),
     );
@@ -290,6 +371,7 @@ class _PostListScreenState extends State<PostListScreen> {
         child: Text(
           label,
           style: TextStyle(
+            fontFamily: AppTheme.fontFamily,
             color: selected ? AppColors.primary : Colors.white,
             fontSize: 12,
             fontWeight: FontWeight.w700,
@@ -326,6 +408,7 @@ class _PostListScreenState extends State<PostListScreen> {
               const Text(
                 'Terjadi Kesalahan',
                 style: TextStyle(
+                  fontFamily: AppTheme.fontFamily,
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                 ),
@@ -334,13 +417,19 @@ class _PostListScreenState extends State<PostListScreen> {
               Text(
                 _error!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.textSecondary),
+                style: const TextStyle(
+                  fontFamily: AppTheme.fontFamily,
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed: _loadPosts,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Coba Lagi'),
+                label: const Text(
+                  'Coba Lagi',
+                  style: TextStyle(fontFamily: AppTheme.fontFamily),
+                ),
               ),
             ],
           ),
@@ -354,26 +443,43 @@ class _PostListScreenState extends State<PostListScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              width: 140,
+              height: 140,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primary.withOpacity(0.15),
+                    AppColors.primaryLight.withOpacity(0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
               ),
-              child: const Icon(Icons.article_outlined,
-                  size: 56, color: AppColors.primary),
+              child: const Icon(
+                Icons.article_outlined,
+                size: 64,
+                color: AppColors.primary,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             const Text(
               'Belum Ada Artikel',
               style: TextStyle(
+                fontFamily: AppTheme.fontFamily,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             const Text(
-              'Klik tombol Tulis untuk membuat',
-              style: TextStyle(color: AppColors.textSecondary),
+              'Klik tombol Tulis untuk membuat artikel baru',
+              style: TextStyle(
+                fontFamily: AppTheme.fontFamily,
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),

@@ -92,6 +92,7 @@ class _PostFormScreenState extends State<PostFormScreen> {
   }
 
   @override
+
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
